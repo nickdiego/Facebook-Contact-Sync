@@ -22,8 +22,6 @@
  */
 package ro.weednet;
 
-import com.appbrain.AppBrain;
-
 import ro.weednet.contactssync.Constants;
 import ro.weednet.contactssync.activities.Preferences;
 import ro.weednet.contactssync.client.RawContact;
@@ -78,8 +76,6 @@ public class ContactsSync extends Application {
 		
 		reloadPreferences();
 		mMaxPhotoSize = ContactManager.getPhotoPickSize(this);
-		
-		AppBrain.initApp(this);
 	}
 	
 	public SyncType getSyncType() {

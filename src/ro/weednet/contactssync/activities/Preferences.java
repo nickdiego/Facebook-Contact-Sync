@@ -22,8 +22,6 @@
  */
 package ro.weednet.contactssync.activities;
 
-import com.appbrain.AppBrain;
-
 import ro.weednet.ContactsSync;
 import ro.weednet.contactssync.R;
 import ro.weednet.contactssync.authenticator.AuthenticatorActivity;
@@ -84,15 +82,11 @@ public class Preferences extends Activity {
 		
 		setContentView(R.layout.preferences);
 		
-		ContactsSync app = ContactsSync.getInstance();
+	//	ContactsSync app = ContactsSync.getInstance();
 		
-		if (!app.getDisableAds()) {
-			LinearLayout adContainer = (LinearLayout) findViewById(R.id.ad_container);
-			View ad = getLayoutInflater().inflate(R.layout.applovin, null);
-			adContainer.addView(ad);
-		} else {
+	//	if (app.getDisableAds()) {
 			((LinearLayout) findViewById(R.id.ad_container)).setVisibility(View.GONE);
-		}
+	//	}
 		
 		FragmentTransaction ft = getFragmentManager().beginTransaction();
 		mFragment = new GlobalFragment();
@@ -179,14 +173,11 @@ public class Preferences extends Activity {
 	
 	@Override
 	public void onBackPressed() {
-		ContactsSync app = ContactsSync.getInstance();
+	//	ContactsSync app = ContactsSync.getInstance();
 		
-		if (!app.getDisableAds()) {
-			AppBrain.getAds().maybeShowInterstitial(this);
-			finish();
-		} else {
+	//	if (app.getDisableAds()) {
 			super.onBackPressed();
-		}
+	//	}
 	}
 	
 	protected void updateStatusMessage(Account account, int code) {
