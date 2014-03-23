@@ -134,7 +134,7 @@ public class Preferences extends Activity {
 			}
 			
 			mAuthDialog = new Dialog(this);
-			mAuthDialog.setContentView(R.layout.not_account_actions);
+			mAuthDialog.setContentView(R.layout.no_account_actions);
 			mAuthDialog.setTitle("Select option");
 			((Button) mAuthDialog.findViewById(R.id.add_account_button)).setOnClickListener(new View.OnClickListener() {
 				@Override
