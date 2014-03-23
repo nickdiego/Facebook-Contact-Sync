@@ -134,6 +134,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 	@Override
 	public void onStart() {
 		super.onStart();
+		
 		Session session = Session.getActiveSession();
 		
 		session.addCallback(mStatusCallback);

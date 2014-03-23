@@ -22,6 +22,10 @@
  */
 package ro.weednet.contactssync.activities;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.sql.Date;
+
 import ro.weednet.ContactsSync;
 import ro.weednet.contactssync.R;
 import ro.weednet.contactssync.authenticator.AuthenticatorActivity;
@@ -40,6 +44,7 @@ import android.content.Intent;
 import android.content.SyncStatusObserver;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -56,6 +61,7 @@ public class Preferences extends Activity {
 	public final static int DEFAULT_CONNECTION_TIMEOUT = 60;
 	public final static boolean DEFAULT_DISABLE_ADS = false;
 	
+	private Account mAccount;
 	private Dialog mAuthDialog;
 	private GlobalFragment mFragment;
 	private SyncStatusObserver mSyncObserver = new SyncStatusObserver() {
@@ -64,12 +70,7 @@ public class Preferences extends Activity {
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					//TODO: add support for multiple accounts (check account name)
-					Account account = ContactsSync.getInstance().getAccount();
-					
-					if (account != null) {
-						updateStatusMessage(account, which);
-					}
+					updateStatusMessage(which);
 				}
 			});
 		}
@@ -104,20 +105,19 @@ public class Preferences extends Activity {
 		mNotificationManager.cancelAll();
 		
 		//TODO: use current/selected account (not the first one)
-		Account account = ContactsSync.getInstance().getAccount();
+		mAccount = ContactsSync.getInstance().getAccount();
 		
-		if (account != null) {
+		if (mAccount != null) {
 			if (mAuthDialog != null) {
 				mAuthDialog.dismiss();
 			}
 			
-			// Log.d("pref-bundle", icicle != null ? icicle.toString() : "null");
-			mFragment.setAccount(account);
-			if (ContentResolver.getSyncAutomatically(account, ContactsContract.AUTHORITY)) {
+			mFragment.setAccount(mAccount);
+			if (ContentResolver.getSyncAutomatically(mAccount, ContactsContract.AUTHORITY)) {
 				if (app.getSyncFrequency() == 0) {
 					app.setSyncFrequency(Preferences.DEFAULT_SYNC_FREQUENCY);
 					app.savePreferences();
-					ContentResolver.addPeriodicSync(account, ContactsContract.AUTHORITY, new Bundle(), Preferences.DEFAULT_SYNC_FREQUENCY * 3600);
+					ContentResolver.addPeriodicSync(mAccount, ContactsContract.AUTHORITY, new Bundle(), Preferences.DEFAULT_SYNC_FREQUENCY * 3600);
 				}
 			} else {
 				if (app.getSyncFrequency() > 0) {
@@ -125,7 +125,7 @@ public class Preferences extends Activity {
 					app.savePreferences();
 				}
 			}
-			updateStatusMessage(account, 0);
+			updateStatusMessage(0);
 			final int mask = ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE | ContentResolver.SYNC_OBSERVER_TYPE_PENDING;
 			mSyncObserverHandler = ContentResolver.addStatusChangeListener(mask, mSyncObserver);
 		} else {
@@ -180,16 +180,48 @@ public class Preferences extends Activity {
 	//	}
 	}
 	
-	protected void updateStatusMessage(Account account, int code) {
+	protected void updateStatusMessage(int code) {
+		if (mAccount == null) {
+			return;
+		}
+		
 		TextView statusView = (TextView) findViewById(R.id.status_message);
 		
-		if (ContentResolver.isSyncPending(account, ContactsContract.AUTHORITY)) {
-			statusView.setText("Sync pending");
-		} else if (ContentResolver.isSyncActive(account, ContactsContract.AUTHORITY)) {
-			statusView.setText("Syncing ..");
+		if (ContentResolver.isSyncPending(mAccount, ContactsContract.AUTHORITY)) {
+			statusView.setText("Sync waiting for other processes");
+		} else if (ContentResolver.isSyncActive(mAccount, ContactsContract.AUTHORITY)) {
+			statusView.setText("Syncing contacts .. ");
 		} else {
-			int count = ContactManager.getLocalContactsCount(this, account);
-			statusView.setText("Sync idle. " + count + " contacts imported.");
+			int count = ContactManager.getLocalContactsCount(this, mAccount);
+			long syncTimestamp = getLasySyncTime();
+			if (syncTimestamp > 0) {
+				Date syncDate = new Date(syncTimestamp);
+				String date = DateFormat.getDateFormat(this).format(syncDate).toString();
+				String time = DateFormat.getTimeFormat(this).format(syncDate).toString();
+				statusView.setText("Sync at " + date + " " + time + ". " + count + " contacts imported.");
+			} else {
+				statusView.setText("Synced. " + count + " contacts imported.");
+			}
 		}
+	}
+	
+	private long getLasySyncTime() {
+		if (mAccount == null) {
+			return -1;
+		}
+		
+		try {
+			Method getSyncStatus = ContentResolver.class.getMethod(
+					"getSyncStatus", Account.class, String.class);
+			Object status = getSyncStatus.invoke(null, mAccount, ContactsContract.AUTHORITY);
+			Class<?> statusClass = Class.forName("android.content.SyncStatusInfo");
+			boolean isStatusObject = statusClass.isInstance(status);
+			if (isStatusObject) {
+				Field successTime = statusClass.getField("lastSuccessTime");
+				return successTime.getLong(status);
+			}
+		} catch (Exception e) { }
+		
+		return -1;
 	}
 }
