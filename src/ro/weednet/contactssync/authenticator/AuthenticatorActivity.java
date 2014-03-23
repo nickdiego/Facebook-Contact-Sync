@@ -258,7 +258,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 							mLoading.show();
 						}
 					});
-					Request.executeMeRequestAsync(session, new getUserInfo());
+					Request.newMeRequest(session, new getUserInfo()).executeAsync();
 					break;
 				case CLOSED_LOGIN_FAILED:
 					if (isResumed) {
