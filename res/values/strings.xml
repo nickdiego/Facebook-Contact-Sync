@@ -65,6 +65,18 @@
 	<string name="test_auth_key">1. Checking permissions</string>
 	<string name="test_get_friends">2. Checking friends</string>
 	
+	<string name="wizard_sync_type_title">Synchronization type</string>
+	<string name="wizard_sync_type_soft">Sync high resolution picture only on demand (when the contact is opened)</string>
+	<string name="wizard_sync_type_medium">Sync high resolution photos for starred contacts (on demand for rest of them) [recommended]</string>
+	<string name="wizard_sync_type_hard">Sync high resolution photos all contacts [NOT recommended for more than 100 contacts]</string>
+	<string name="wizard_sync_all_title"></string>
+	<string name="wizard_sync_all_contacts_yes">Sync all Facebook friends</string>
+	<string name="wizard_sync_all_contacts_no">Sync only friends that match existing contacts (same name)</string>
+	<string name="wizard_sync_join_by_id">Match existing contacts also by using Facebook ID</string>
+	
+	<string name="next">Next</string>
+	<string name="close">Close</string>
+	
 	<string name="contact_via">Contact via ..</string>
 	<string name="github_btn">Github</string>
 	<string name="email_btn">Email</string>

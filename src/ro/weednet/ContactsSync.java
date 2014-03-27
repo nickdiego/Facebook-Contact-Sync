@@ -51,6 +51,7 @@ public class ContactsSync extends Application {
 	private int mConnTimeout;
 	private boolean mDisableAds;
 	private int mMaxPhotoSize;
+	private boolean mWizardShown;
 	private static ContactsSync _instance = null;
 	
 	public static ContactsSync getInstance() {
@@ -111,7 +112,13 @@ public class ContactsSync extends Application {
 	public int getMaxPhotoSize() {
 		return mMaxPhotoSize;
 	}
+	public boolean getWizardShown() {
+		return mWizardShown;
+	}
 	
+	public void setSyncType(SyncType type) {
+		setSyncType(type.ordinal());
+	}
 	public void setSyncType(int value) {
 		try {
 			mSyncType = SyncType.values()[value];
@@ -165,6 +172,9 @@ public class ContactsSync extends Application {
 	public void setDisableAds(boolean value) {
 		mDisableAds = value;
 	}
+	public void setWizardShown(boolean value) {
+		mWizardShown = value;
+	}
 	
 	public void reloadPreferences() {
 		SharedPreferences settings = getSharedPreferences();
@@ -176,7 +186,7 @@ public class ContactsSync extends Application {
 			mSyncType = Preferences.DEFAULT_SYNC_TYPE;
 		}
 		try {
-			mSyncFreq = Integer.parseInt(settings.getString("sync_freq", Integer.toString(Preferences.DEFAULT_SYNC_FREQUENCY)));//hours
+			mSyncFreq = Integer.parseInt(settings.getString("sync_freq", "0"));//hours, disabled by default, until wizard is shown
 		} catch (NumberFormatException e) {
 			mSyncFreq = Preferences.DEFAULT_SYNC_FREQUENCY;
 		}
@@ -196,6 +206,7 @@ public class ContactsSync extends Application {
 			mConnTimeout = Preferences.DEFAULT_CONNECTION_TIMEOUT;
 		}
 		mDisableAds = settings.getBoolean("disable_ads", Preferences.DEFAULT_DISABLE_ADS);
+		mWizardShown = settings.getBoolean("wizard_shown", false);
 	}
 	
 	public void savePreferences() {
@@ -210,6 +221,7 @@ public class ContactsSync extends Application {
 		editor.putBoolean("full_sync", mFullSync);
 		editor.putString("conn_timeout", Integer.toString(mConnTimeout));
 		editor.putBoolean("disable_ads", mDisableAds);
+		editor.putBoolean("wizard_shown", mWizardShown);
 		
 		editor.commit();
 	}

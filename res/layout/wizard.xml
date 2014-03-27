@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:padding="32dp"
+	android:orientation="vertical">
+	<LinearLayout
+		android:id="@+id/page1"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+		<RadioGroup
+			android:id="@+id/wizard_sync_type"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:padding="16dp"
+			android:orientation="vertical"
+			android:checkedButton="@+id/wizard_sync_type_medium">
+			<RadioButton
+				android:id="@+id/wizard_sync_type_soft"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="16sp"
+				android:text="@string/wizard_sync_type_soft" />
+			<RadioButton
+				android:id="@+id/wizard_sync_type_medium"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="16sp"
+				android:text="@string/wizard_sync_type_medium" />
+			<RadioButton
+				android:id="@+id/wizard_sync_type_hard"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="16sp"
+				android:text="@string/wizard_sync_type_hard" />
+		</RadioGroup>
+	</LinearLayout>
+	<LinearLayout
+		android:id="@+id/page2"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:visibility="gone">
+		<RadioGroup
+			android:id="@+id/wizard_sync_all"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:padding="16dp"
+			android:layout_gravity="center"
+			android:orientation="vertical"
+			android:checkedButton="@+id/wizard_sync_all_contacts_no">
+			<RadioButton
+				android:id="@+id/wizard_sync_all_contacts_yes"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="16sp"
+				android:text="@string/wizard_sync_all_contacts_yes" />
+			<RadioButton
+				android:id="@+id/wizard_sync_all_contacts_no"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="16sp"
+				android:text="@string/wizard_sync_all_contacts_no" />
+		</RadioGroup>
+		<CheckBox
+			android:id="@+id/wizard_sync_join_by_id"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="16sp"
+			android:text="@string/wizard_sync_join_by_id" />
+	</LinearLayout>
+	<Button
+		android:id="@+id/next"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="right"
+		android:text="@string/next" />
+</LinearLayout>

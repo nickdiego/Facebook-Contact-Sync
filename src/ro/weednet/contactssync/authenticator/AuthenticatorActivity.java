@@ -185,7 +185,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 					mAccountManager.setPassword(account, access_token);
 				}
 				
-				if (sync_freq > 0) {
+				if (app.getWizardShown() && sync_freq > 0) {
 					ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
 					
 					Bundle extras = new Bundle();

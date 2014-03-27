@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.sql.Date;
 
 import ro.weednet.ContactsSync;
+import ro.weednet.ContactsSync.SyncType;
 import ro.weednet.contactssync.R;
 import ro.weednet.contactssync.authenticator.AuthenticatorActivity;
 import ro.weednet.contactssync.client.RawContact;
@@ -47,7 +48,9 @@ import android.provider.ContactsContract;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 public class Preferences extends Activity {
@@ -62,7 +65,7 @@ public class Preferences extends Activity {
 	public final static boolean DEFAULT_DISABLE_ADS = false;
 	
 	private Account mAccount;
-	private Dialog mAuthDialog;
+	private Dialog mDialog;
 	private GlobalFragment mFragment;
 	private SyncStatusObserver mSyncObserver = new SyncStatusObserver() {
 		@Override
@@ -99,7 +102,11 @@ public class Preferences extends Activity {
 	public void onResume() {
 		super.onResume();
 		
-		ContactsSync app = ContactsSync.getInstance();
+		if (mDialog != null) {
+			mDialog.dismiss();
+		}
+		
+		final ContactsSync app = ContactsSync.getInstance();
 		
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotificationManager.cancelAll();
@@ -107,12 +114,74 @@ public class Preferences extends Activity {
 		//TODO: use current/selected account (not the first one)
 		mAccount = ContactsSync.getInstance().getAccount();
 		
-		if (mAccount != null) {
-			if (mAuthDialog != null) {
-				mAuthDialog.dismiss();
-			}
-			
+		if (mAccount == null) {
+			mDialog = new Dialog(this);
+			mDialog.setContentView(R.layout.no_account_actions);
+			mDialog.setTitle("Select option");
+			((Button) mDialog.findViewById(R.id.add_account_button)).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					mDialog.dismiss();
+					Intent intent = new Intent(Preferences.this, AuthenticatorActivity.class);
+					startActivity(intent);
+				}
+			});
+			((Button) mDialog.findViewById(R.id.exit_button)).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					mDialog.dismiss();
+					Preferences.this.finish();
+				}
+			});
+			mDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					mDialog.dismiss();
+					Preferences.this.finish();
+				}
+			});
+			mDialog.show();
+		} else if (!app.getWizardShown()) {
+			mDialog = new Dialog(this);
+			mDialog.setContentView(R.layout.wizard);
+			mDialog.setTitle("Select option");
+			mDialog.findViewById(R.id.next).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if (mDialog.findViewById(R.id.page1).getVisibility() == View.VISIBLE) {
+						mDialog.findViewById(R.id.page1).setVisibility(View.GONE);
+						mDialog.findViewById(R.id.page2).setVisibility(View.VISIBLE);
+						((TextView) mDialog.findViewById(R.id.next)).setText(getString(R.string.close));
+					} else if (mDialog.findViewById(R.id.page2).getVisibility() == View.VISIBLE) {
+						
+						if (((RadioButton) mDialog.findViewById(R.id.wizard_sync_type_soft)).isChecked()) {
+							app.setSyncType(SyncType.SOFT);
+						} else if (((RadioButton) mDialog.findViewById(R.id.wizard_sync_type_medium)).isChecked()) {
+							app.setSyncType(SyncType.MEDIUM);
+						} else if (((RadioButton) mDialog.findViewById(R.id.wizard_sync_type_hard)).isChecked()) {
+							app.setSyncType(SyncType.HARD);
+						}
+						
+						app.setSyncAllContacts(((RadioButton) mDialog.findViewById(R.id.wizard_sync_all_contacts_yes)).isChecked());
+						app.setJoinById(((CheckBox) mDialog.findViewById(R.id.wizard_sync_join_by_id)).isChecked());
+						app.setSyncFrequency(DEFAULT_SYNC_FREQUENCY);
+						app.setWizardShown(true);
+						app.savePreferences();
+						
+						ContentResolver.setSyncAutomatically(mAccount, ContactsContract.AUTHORITY, true);
+						Bundle extras = new Bundle();
+						ContentResolver.addPeriodicSync(mAccount, ContactsContract.AUTHORITY, extras, DEFAULT_SYNC_FREQUENCY * 3600);
+						mDialog.dismiss();
+						
+						updateStatusMessage(0);
+						mFragment.updateViews();
+					}
+				}
+			});
+			mDialog.show();
+		} else {
 			mFragment.setAccount(mAccount);
+			//TODO: check logic
 			if (ContentResolver.getSyncAutomatically(mAccount, ContactsContract.AUTHORITY)) {
 				if (app.getSyncFrequency() == 0) {
 					app.setSyncFrequency(Preferences.DEFAULT_SYNC_FREQUENCY);
@@ -128,37 +197,6 @@ public class Preferences extends Activity {
 			updateStatusMessage(0);
 			final int mask = ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE | ContentResolver.SYNC_OBSERVER_TYPE_PENDING;
 			mSyncObserverHandler = ContentResolver.addStatusChangeListener(mask, mSyncObserver);
-		} else {
-			if (mAuthDialog != null) {
-				mAuthDialog.dismiss();
-			}
-			
-			mAuthDialog = new Dialog(this);
-			mAuthDialog.setContentView(R.layout.no_account_actions);
-			mAuthDialog.setTitle("Select option");
-			((Button) mAuthDialog.findViewById(R.id.add_account_button)).setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					mAuthDialog.dismiss();
-					Intent intent = new Intent(Preferences.this, AuthenticatorActivity.class);
-					startActivity(intent);
-				}
-			});
-			((Button) mAuthDialog.findViewById(R.id.exit_button)).setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					mAuthDialog.dismiss();
-					Preferences.this.finish();
-				}
-			});
-			mAuthDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-				@Override
-				public void onCancel(DialogInterface dialog) {
-					mAuthDialog.dismiss();
-					Preferences.this.finish();
-				}
-			});
-			mAuthDialog.show();
 		}
 	}
 	
@@ -186,7 +224,7 @@ public class Preferences extends Activity {
 		}
 		
 		TextView statusView = (TextView) findViewById(R.id.status_message);
-		
+		//TODO: add sync disabled message
 		if (ContentResolver.isSyncPending(mAccount, ContactsContract.AUTHORITY)) {
 			statusView.setText("Sync waiting for other processes");
 		} else if (ContentResolver.isSyncActive(mAccount, ContactsContract.AUTHORITY)) {
@@ -198,7 +236,7 @@ public class Preferences extends Activity {
 				Date syncDate = new Date(syncTimestamp);
 				String date = DateFormat.getDateFormat(this).format(syncDate).toString();
 				String time = DateFormat.getTimeFormat(this).format(syncDate).toString();
-				statusView.setText("Sync at " + date + " " + time + ". " + count + " contacts imported.");
+				statusView.setText("Synced at " + date + " " + time + ". " + count + " contacts imported.");
 			} else {
 				statusView.setText("Synced. " + count + " contacts imported.");
 			}

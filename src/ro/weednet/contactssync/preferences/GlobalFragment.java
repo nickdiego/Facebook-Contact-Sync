@@ -20,6 +20,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.provider.ContactsContract;
@@ -178,6 +179,17 @@ public class GlobalFragment extends PreferenceFragment {
 		} else {
 			findPreference("rate_app").setEnabled(false);
 		}
+	}
+	
+	public void updateViews() {
+		ContactsSync app = ContactsSync.getInstance();
+		
+		((ListPreference) findPreference("sync_type")).setValue(Integer.toString(app.getSyncType().ordinal()));
+		((ListPreference) findPreference("sync_freq")).setValue(Integer.toString(app.getSyncFrequency()));
+		((ListPreference) findPreference("pic_size")).setValue(Integer.toString(app.getPictureSize()));
+		((CheckBoxPreference) findPreference("sync_all")).setChecked(app.getSyncAllContacts());
+		((CheckBoxPreference) findPreference("sync_wifi_only")).setChecked(app.getSyncWifiOnly());
+		((CheckBoxPreference) findPreference("sync_join_by_id")).setChecked(app.getJoinById());
 	}
 	
 	Preference.OnPreferenceChangeListener syncTypeChange = new Preference.OnPreferenceChangeListener() {
