@@ -236,9 +236,9 @@ public class Preferences extends Activity {
 				Date syncDate = new Date(syncTimestamp);
 				String date = DateFormat.getDateFormat(this).format(syncDate).toString();
 				String time = DateFormat.getTimeFormat(this).format(syncDate).toString();
-				statusView.setText("Synced at " + date + " " + time + ". " + count + " contacts imported.");
+				statusView.setText("Synced at " + date + " " + time + ". " + count + " contact" + (count == 1 ? "" : "s") + " imported.");
 			} else {
-				statusView.setText("Synced. " + count + " contacts imported.");
+				statusView.setText("Synced. " + count + " contact" + (count == 1 ? "" : "s") + " imported.");
 			}
 		}
 	}
