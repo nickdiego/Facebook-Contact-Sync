@@ -26,6 +26,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.sql.Date;
 
+import com.ironsource.mobilcore.CallbackResponse;
+import com.ironsource.mobilcore.MobileCore;
+import com.ironsource.mobilcore.CallbackResponse.TYPE;
+
 import ro.weednet.ContactsSync;
 import ro.weednet.ContactsSync.SyncType;
 import ro.weednet.contactssync.R;
@@ -100,6 +104,8 @@ public class Preferences extends Activity {
 		mFragment = new GlobalFragment();
 		ft.replace(R.id.settings, mFragment);
 		ft.commit();
+		
+		MobileCore.init(this, "3QBXU338FKE1M2ZSZEH3WRKIXJ0C5", MobileCore.LOG_TYPE.PRODUCTION, MobileCore.AD_UNITS.OFFERWALL);
 	}
 	
 	@Override
@@ -215,11 +221,18 @@ public class Preferences extends Activity {
 	
 	@Override
 	public void onBackPressed() {
-	//	ContactsSync app = ContactsSync.getInstance();
+		ContactsSync app = ContactsSync.getInstance();
 		
-	//	if (app.getDisableAds()) {
+		if (app.getDisableAds()) {
 			super.onBackPressed();
-	//	}
+		} else {
+			MobileCore.showOfferWall(this, new CallbackResponse() {
+				@Override
+				public void onConfirmation(TYPE arg0) {
+					finish();
+				}
+			});
+		}
 	}
 	
 	protected void updateStatusMessage(int code) {

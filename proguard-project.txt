@@ -32,3 +32,5 @@
 }
 -keepattributes *Annotation*
 -dontwarn android.webkit.JavascriptInterface
+
+-keep class com.ironsource.mobilcore.*{ *; }
