@@ -86,11 +86,15 @@ public class Preferences extends Activity {
 		
 		setContentView(R.layout.preferences);
 		
-	//	ContactsSync app = ContactsSync.getInstance();
+		ContactsSync app = ContactsSync.getInstance();
 		
-	//	if (app.getDisableAds()) {
+		if (app.getDisableAds()) {
 			((LinearLayout) findViewById(R.id.ad_container)).setVisibility(View.GONE);
-	//	}
+		} else {
+			LinearLayout adContainer = (LinearLayout) findViewById(R.id.ad_container);
+			View ad = getLayoutInflater().inflate(R.layout.applovin, null);
+			adContainer.addView(ad);
+		}
 		
 		FragmentTransaction ft = getFragmentManager().beginTransaction();
 		mFragment = new GlobalFragment();
